@@ -120,9 +120,9 @@ end
 task.spawn(claimGifts)
 getgenv().settings = {}
   --Load Settings
-if isfile("plsdonatesettings.txt") then
+if isfile("plsdonateautofarm.txt") then
 	local sl, er = pcall(function()
-		getgenv().settings = httpservice:JSONDecode(readfile('plsdonatesettings.txt'))
+		getgenv().settings = httpservice:JSONDecode(readfile('plsdonateautofarm.txt'))
 	end)
 	if er ~= nil then
 		task.spawn(function()
@@ -132,7 +132,7 @@ if isfile("plsdonatesettings.txt") then
 			task.wait(15)
 			errMsg:Destroy()
 		end)
-		delfile("plsdonatesettings.txt")
+		delfile("plsdonateautofarm.txt")
 	end
 end
 local sNames = {
@@ -236,7 +236,7 @@ if #getgenv().settings ~= sNames then
 			getgenv().settings[v] = sValues[i]
 		end
 	end
-	writefile('plsdonatesettings.txt', httpservice:JSONEncode(getgenv().settings))
+	writefile('plsdonateautofarm.txt', httpservice:JSONEncode(getgenv().settings))
 end
 
   --Save Settings
@@ -244,7 +244,7 @@ local settingsLock = true
 local function saveSettings()
 	if settingsLock == false then
 		print('Settings saved.')
-		writefile('plsdonatesettings.txt', httpservice:JSONEncode(getgenv().settings))
+		writefile('plsdonateautofarm.txt', httpservice:JSONEncode(getgenv().settings))
 	end
 end
 function serverHop()
