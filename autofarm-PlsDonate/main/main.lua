@@ -17,17 +17,6 @@ repeat
 	task.wait()
 until game:IsLoaded()
 
-if isfile and writefile and typeof(isfile) == 'function' and typeof(writefile) == 'function' then
-	if not isfile('PromptedDiscordCFCommunityRR.txt') then
-		writefile('PromptedDiscordCFCommunityRR.txt', game:GetService('HttpService'):JSONEncode('hi'))
-		local Module = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Discord%20Inviter/Source.lua"))()
-		Module.Prompt({
-			invite = "https://discord.gg/fNeggqVMZs",
-			name = "CF Community",
-		})
-	end
-end
-
   --Stops script if on a different game
 if game.PlaceId ~= 8737602449 and game.PlaceId ~= 8943844393 then
 	return
@@ -35,7 +24,6 @@ end
 
 local xspin = 0
 
-print('TurningGlobe ily thanks for showcasing / szze#6220')
 if getgenv().loadedRR then
 	return
 else
@@ -149,6 +137,8 @@ if isfile("plsdonatesettings.txt") then
 end
 local sNames = {
 	"textUpdateToggle",
+    "pingOnDonation",
+    "MinimumRobuxForPing"
 	"textUpdateDelay",
 	"serverHopToggle",
 	"serverHopDelay",
@@ -192,6 +182,8 @@ local positionX = workspace:WaitForChild('Boomboxes'):WaitForChild('Spawn')
 
 local sValues = {
 	true,
+    false,
+    1,
 	30,
 	true,
 	15,
@@ -412,12 +404,13 @@ local function webhook(msg)
 end
 
   --GUI
-local Window = library:AddWindow("welcome dtt haters | szze#6220",
+local Window = library:AddWindow("pls donate autofarm",
   {
 	main_color = Color3.fromRGB(80, 80, 80),
 	min_size = Vector2.new(373, 433),
 	toggle_key = Enum.KeyCode.RightShift,
 })
+
 local boothTab = Window:AddTab("Booth")
 local signTab = Window:AddTab("Sign")
 local chatTab = Window:AddTab("Chat")
@@ -688,6 +681,27 @@ local serverHopDonation = webhookTab:AddSwitch("Notification after serverhop", f
 end)
 
 serverHopDonation:Set(getgenv().settings.webhookAfterSH)
+
+local serverHopDonation = webhookTab:AddSwitch("Ping @everyone on Donation", function(bool)
+	getgenv().settings.pingOnDonation = bool
+	saveSettings()
+end)
+
+serverHopDonation:Set(getgenv().settings.pingOnDonation)
+
+local MinimumRobuxForPingSlider = webhookTab:AddSlider("Minimum Robux For Ping", function(x)
+	if settingsLock then
+		return
+	end
+	getgenv().settings.MinimumRobuxForPing = x
+	coroutine.wrap(slider)(getgenv().settings.MinimumRobuxForPing, "MinimumRobuxForPing")
+end,
+  {
+	["min"] = 1,
+	["max"] = 1000
+})
+
+MinimumRobuxForPing:Set((getgenv().settings.begDelay / 300) * 100)
 
 local webhookBox = webhookTab:AddTextBox("Webhook URL", function(text)
 	if string.find(text, "api/") then
@@ -990,7 +1004,10 @@ Players.LocalPlayer.leaderstats.Raised.Changed:Connect(function()
 		local LogService = Game:GetService("LogService")
 		local logs = LogService:GetLogHistory()
 		if string.find(logs[#logs].message, Players.LocalPlayer.DisplayName) then
-			webhook("💰 Tip | Amount: " .. tostring(Players.LocalPlayer.leaderstats.Raised.Value - RaisedC) .. 'R$ (after tax: ' .. tostring(math.floor((Players.LocalPlayer.leaderstats.Raised.Value - RaisedC) * 0.6)) .. 'R$) | Total: ' .. tostring(Players.LocalPlayer.leaderstats.Raised.Value) .. 'R$ | Account: ' .. Players.LocalPlayer.DisplayName .. ' (' .. Players.LocalPlayer.Name .. ') | Server Message: ' .. logs[#logs].message:gsub('', ''))
+            if Players.LocalPlayer.leaderstats.Raised.Value - RaisedC => getgenv().settings.MinimumRobuxForPing and getgenv().settings.pingOnDonation == true then
+			    webhook("||@everyone|| 💰 Tip | Amount: " .. tostring(Players.LocalPlayer.leaderstats.Raised.Value - RaisedC) .. 'R$ (after tax: ' .. tostring(math.floor((Players.LocalPlayer.leaderstats.Raised.Value - RaisedC) * 0.6)) .. 'R$) | Total: ' .. tostring(Players.LocalPlayer.leaderstats.Raised.Value) .. 'R$ | Account: ' .. Players.LocalPlayer.DisplayName .. ' (' .. Players.LocalPlayer.Name .. ') | Server Message: ' .. logs[#logs].message:gsub('', ''))
+            end
+            webhook("💰 Tip | Amount: " .. tostring(Players.LocalPlayer.leaderstats.Raised.Value - RaisedC) .. 'R$ (after tax: ' .. tostring(math.floor((Players.LocalPlayer.leaderstats.Raised.Value - RaisedC) * 0.6)) .. 'R$) | Total: ' .. tostring(Players.LocalPlayer.leaderstats.Raised.Value) .. 'R$ | Account: ' .. Players.LocalPlayer.DisplayName .. ' (' .. Players.LocalPlayer.Name .. ') | Server Message: ' .. logs[#logs].message:gsub('', ''))
 		else
 			webhook("💰 Tip | Amount: " .. tostring(Players.LocalPlayer.leaderstats.Raised.Value - RaisedC) .. 'R$ (after tax: ' .. tostring(math.floor((Players.LocalPlayer.leaderstats.Raised.Value - RaisedC) * 0.6)) .. 'R$) | Total: ' .. tostring(Players.LocalPlayer.leaderstats.Raised.Value) .. 'R$ | Account: ' .. Players.LocalPlayer.DisplayName .. ' (' .. Players.LocalPlayer.Name .. ') | Couldnt fetch server message')
 		end
@@ -1117,8 +1134,8 @@ msgdone.OnClientEvent:Connect(function(msgdata)
 		end
 	end)
 end)
-if game:GetService("CoreGui").imgui.Windows.Window.Title.Text == "Loading..." then
-	game:GetService("CoreGui").imgui.Windows.Window.Title.Text = "dtt haters hello | szze#6220"
+if game:GetService("CoreGui").imgui.Windows.Window.Title.Text == "Loading" then
+	game:GetService("CoreGui").imgui.Windows.Window.Title.Text = "pls donate #1 autofarm"
 end
 while task.wait(getgenv().settings.serverHopDelay * 60) do
 	if not hopTimer then
